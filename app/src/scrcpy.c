@@ -40,6 +40,7 @@
 #include "util/acksync.h"
 #include "util/log.h"
 #include "util/rand.h"
+#include "util/thread.h"
 #include "util/timeout.h"
 #include "util/tick.h"
 #ifdef HAVE_V4L2
@@ -278,6 +279,79 @@ scrcpy_generate_scid(void) {
     sc_rand_init(&rand);
     // Only use 31 bits to avoid issues with signed values on the Java-side
     return sc_rand_u32(&rand) & 0x7FFFFFFF;
+}
+
+
+struct sc_screenshot_ctx {
+    sc_mutex mutex;
+    sc_cond cond;
+    bool done;
+    bool ok;
+    uint8_t *data;
+    size_t size;
+};
+
+static void
+sc_screenshot_on_screenshot(struct sc_controller *controller,
+                            const struct sc_device_msg *msg,
+                            void *userdata) {
+    (void) controller;
+
+    struct sc_screenshot_ctx *ctx = userdata;
+    assert(msg->type == DEVICE_MSG_TYPE_SCREENSHOT);
+
+    sc_mutex_lock(&ctx->mutex);
+    if (!ctx->done) {
+        ctx->data = malloc(msg->screenshot.size);
+        if (ctx->data) {
+            memcpy(ctx->data, msg->screenshot.data, msg->screenshot.size);
+            ctx->size = msg->screenshot.size;
+            ctx->ok = true;
+        }
+        ctx->done = true;
+        sc_cond_signal(&ctx->cond);
+    }
+    sc_mutex_unlock(&ctx->mutex);
+}
+
+static void
+sc_screenshot_on_controller_ended(struct sc_controller *controller, bool error,
+                                  void *userdata) {
+    (void) controller;
+
+    struct sc_screenshot_ctx *ctx = userdata;
+    sc_mutex_lock(&ctx->mutex);
+    if (!ctx->done) {
+        ctx->done = true;
+        ctx->ok = false;
+        sc_cond_signal(&ctx->cond);
+    }
+    sc_mutex_unlock(&ctx->mutex);
+
+    if (error) {
+        LOGW("Screenshot aborted (controller error)");
+    }
+}
+
+static bool
+sc_screenshot_save(const char *path, const uint8_t *data, size_t size) {
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        LOGE("Could not open screenshot file: %s", path);
+        return false;
+    }
+
+    size_t w = fwrite(data, 1, size, f);
+    int err = ferror(f);
+    fclose(f);
+
+    if (err || w != size) {
+        LOGE("Could not write screenshot file: %s", path);
+        return false;
+    }
+
+    LOGI("Screenshot saved to %s", path);
+    return true;
 }
 
 static void
@@ -724,6 +798,41 @@ aoa_complete:
             goto end;
         }
         controller_started = true;
+
+        if (options->screenshot) {
+            if (!sc_controller_get_screenshot(controller)) {
+                LOGE("Could not request screenshot");
+                sc_cond_destroy(&screenshot_ctx.cond);
+                sc_mutex_destroy(&screenshot_ctx.mutex);
+                goto end;
+            }
+
+            sc_tick deadline = sc_tick_now() + SC_TICK_FROM_SEC(10);
+            sc_mutex_lock(&screenshot_ctx.mutex);
+            while (!screenshot_ctx.done) {
+                bool timed_out = !sc_cond_timedwait(&screenshot_ctx.cond,
+                                                    &screenshot_ctx.mutex,
+                                                    deadline);
+                if (timed_out) {
+                    LOGE("Screenshot timeout");
+                    break;
+                }
+            }
+            bool ok = screenshot_ctx.ok;
+            uint8_t *data = screenshot_ctx.data;
+            size_t size = screenshot_ctx.size;
+            sc_mutex_unlock(&screenshot_ctx.mutex);
+
+            if (ok) {
+                ok = sc_screenshot_save(options->screenshot, data, size);
+                free(data);
+                ret = ok ? SCRCPY_EXIT_SUCCESS : SCRCPY_EXIT_FAILURE;
+            }
+
+            sc_cond_destroy(&screenshot_ctx.cond);
+            sc_mutex_destroy(&screenshot_ctx.mutex);
+            goto end;
+        }
     }
 
     // There is a controller if and only if control is enabled

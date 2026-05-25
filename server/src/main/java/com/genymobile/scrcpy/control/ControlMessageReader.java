@@ -62,6 +62,8 @@ public class ControlMessageReader {
                 return parseCameraSetTorch();
             case ControlMessage.TYPE_RESIZE_DISPLAY:
                 return parseResizeDisplay();
+            case ControlMessage.TYPE_GET_SCREENSHOT:
+                return ControlMessage.createGetScreenshot();
             default:
                 throw new ControlProtocolException("Unknown event type: " + type);
         }
@@ -181,13 +183,6 @@ public class ControlMessageReader {
         int width = dis.readUnsignedShort();
         int height = dis.readUnsignedShort();
         return ControlMessage.createResizeDisplay(width, height);
-    }
-
-    private ControlMessage parseGetScreenshot() throws IOException {
-        int format = dis.readUnsignedByte();
-        int jpegQuality = dis.readUnsignedByte();
-        int maxDimension = dis.readInt();
-        return ControlMessage.createGetScreenshot(format, jpegQuality, maxDimension);
     }
 
     private Position parsePosition() throws IOException {

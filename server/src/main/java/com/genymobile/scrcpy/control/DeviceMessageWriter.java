@@ -40,7 +40,6 @@ public class DeviceMessageWriter {
                 dos.write(data);
                 break;
             case DeviceMessage.TYPE_SCREENSHOT:
-                dos.writeByte(msg.getId()); // format
                 dos.writeShort(msg.getWidth());
                 dos.writeShort(msg.getHeight());
                 byte[] screenshotData = msg.getData();

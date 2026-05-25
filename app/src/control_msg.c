@@ -189,6 +189,8 @@ sc_control_msg_serialize(const struct sc_control_msg *msg, uint8_t *buf) {
             sc_write16be(&buf[1], msg->resize_display.width);
             sc_write16be(&buf[3], msg->resize_display.height);
             return 5;
+        case SC_CONTROL_MSG_TYPE_GET_SCREENSHOT:
+            return 1;
         case SC_CONTROL_MSG_TYPE_EXPAND_NOTIFICATION_PANEL:
         case SC_CONTROL_MSG_TYPE_EXPAND_SETTINGS_PANEL:
         case SC_CONTROL_MSG_TYPE_COLLAPSE_PANELS:
@@ -282,9 +284,7 @@ sc_control_msg_log(const struct sc_control_msg *msg) {
                      msg->resize_display.width, msg->resize_display.height);
             break;
         case SC_CONTROL_MSG_TYPE_GET_SCREENSHOT:
-            LOG_CMSG("get screenshot format=%u quality=%u max=%d",
-                     msg->get_screenshot.format, msg->get_screenshot.jpeg_quality,
-                     msg->get_screenshot.max_dimension);
+            LOG_CMSG("get screenshot");
             break;
         case SC_CONTROL_MSG_TYPE_EXPAND_NOTIFICATION_PANEL:
             LOG_CMSG("expand notification panel");

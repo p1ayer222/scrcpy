@@ -437,22 +437,25 @@ The only documentation for this protocol is the set of unit tests on both sides:
  - `DeviceMessage` (from device to client) [serialization](https://github.com/Genymobile/scrcpy/blob/master/server/src/test/java/com/genymobile/scrcpy/control/DeviceMessageWriterTest.java)
    | [deserialization](https://github.com/Genymobile/scrcpy/blob/master/app/tests/test_device_msg_deserialize.c)
 
-To request a device screenshot (using the same capture path as video mirroring, not
-`screencap`), the client sends a `GET_SCREENSHOT` control message:
+To capture a still image of the device screen (JPEG), the client sends a
+`GET_SCREENSHOT` control message (type `22`, no payload).
 
- - type: `22`
- - format: `u8` (`0`: JPEG, `1`: PNG)
- - jpeg quality: `u8` (ignored for PNG)
- - max dimension: `i32` (maximum width or height in pixels, `0` for no limit)
+The device answers with a `SCREENSHOT` device message (type `3`):
 
-The device answers with a `SCREENSHOT` device message:
-
- - type: `3`
- - format: `u8`
  - width: `u16`
  - height: `u16`
  - data size: `u32`
- - data: image bytes (up to 2 MiB)
+ - data: JPEG bytes (up to 2 MiB)
+
+The capture uses the same path as video mirroring (VirtualDisplay + ImageReader,
+with SurfaceControl/ScreenCapture fallbacks), **not** the `screencap` shell
+command.
+
+From the command line:
+
+```bash
+scrcpy --screenshot=screen.jpg
+```
 
 
 ## Standalone server

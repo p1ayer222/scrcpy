@@ -25,9 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Screenshot {
 
-    public static final int FORMAT_JPEG = 0;
-    public static final int FORMAT_PNG = 1;
-
     public static final int DEFAULT_JPEG_QUALITY = 80;
     public static final int MAX_SIZE = 1 << 21; // 2 MiB, must match protocol limit
 
@@ -49,7 +46,7 @@ public final class Screenshot {
         // not instantiable
     }
 
-    public static Result capture(int displayId, int format, int jpegQuality, int maxDimension)
+    public static Result capture(int displayId, int maxDimension)
             throws IOException {
         DisplayInfo displayInfo = ServiceManager.getDisplayManager().getDisplayInfo(displayId);
         if (displayInfo == null) {

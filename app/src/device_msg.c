@@ -47,14 +47,13 @@ sc_device_msg_deserialize(const uint8_t *buf, size_t len,
             return 9;
         }
         case DEVICE_MSG_TYPE_SCREENSHOT: {
-            if (len < 10) {
+            if (len < 9) {
                 return 0;
             }
-            uint8_t format = buf[1];
-            uint16_t width = sc_read16be(&buf[2]);
-            uint16_t height = sc_read16be(&buf[4]);
-            size_t data_len = sc_read32be(&buf[6]);
-            if (data_len > DEVICE_MSG_SCREENSHOT_MAX_SIZE || data_len > len - 10) {
+            uint16_t width = sc_read16be(&buf[1]);
+            uint16_t height = sc_read16be(&buf[3]);
+            size_t data_len = sc_read32be(&buf[5]);
+            if (data_len > DEVICE_MSG_SCREENSHOT_MAX_SIZE || data_len > len - 9) {
                 return 0;
             }
             uint8_t *data = malloc(data_len);
@@ -63,17 +62,16 @@ sc_device_msg_deserialize(const uint8_t *buf, size_t len,
                 return -1;
             }
             if (data_len) {
-                memcpy(data, &buf[10], data_len);
+                memcpy(data, &buf[9], data_len);
             }
 
-            msg->screenshot.format = format;
             msg->screenshot.width = width;
             msg->screenshot.height = height;
             msg->screenshot.size = data_len;
             msg->screenshot.data = data;
-            return 10 + data_len;
+            return 9 + data_len;
         }
-        case DEVICE_MSG_TYPE_UHID_OUTPUT: {
+        case DEVICE_MSG_TYPE_UHID_OUTPUT        case DEVICE_MSG_TYPE_UHID_OUTPUT: {
             if (len < 5) {
                 // at least id + size
                 return 0; // not available

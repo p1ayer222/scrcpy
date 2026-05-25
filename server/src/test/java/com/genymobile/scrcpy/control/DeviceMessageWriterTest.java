@@ -79,7 +79,6 @@ public class DeviceMessageWriterTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
         dos.writeByte(DeviceMessage.TYPE_SCREENSHOT);
-        dos.writeByte(0); // format
         dos.writeShort(1920);
         dos.writeShort(1080);
         dos.writeInt(data.length);
@@ -89,7 +88,7 @@ public class DeviceMessageWriterTest {
         bos = new ByteArrayOutputStream();
         DeviceMessageWriter writer = new DeviceMessageWriter(bos);
 
-        DeviceMessage msg = DeviceMessage.createScreenshot(0, 1920, 1080, data);
+        DeviceMessage msg = DeviceMessage.createScreenshot(1920, 1080, data);
         writer.write(msg);
 
         byte[] actual = bos.toByteArray();

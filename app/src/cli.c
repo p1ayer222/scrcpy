@@ -109,6 +109,7 @@ enum {
     OPT_KEEP_ACTIVE,
     OPT_BACKGROUND_COLOR,
     OPT_RENDER_FIT,
+    OPT_SCREENSHOT,
 };
 
 struct sc_option {
@@ -772,6 +773,14 @@ static const struct sc_option options[] = {
         .text = "Record screen to file.\n"
                 "The format is determined by the --record-format option if "
                 "set, or by the file extension.",
+    },
+    {
+        .longopt_id = OPT_SCREENSHOT,
+        .longopt = "screenshot",
+        .argdesc = "file.jpg",
+        .text = "Capture the device screen to a JPEG file and exit.\n"
+                "Does not open a window. Uses the same capture path as "
+                "mirroring (not screencap).",
     },
     {
         .longopt_id = OPT_RAW_KEY_EVENTS,
@@ -2901,6 +2910,15 @@ parse_args_with_getopt(struct scrcpy_cli_args *args, int argc, char *argv[],
             case OPT_NO_WINDOW_ASPECT_RATIO_LOCK:
                 opts->window_aspect_ratio_lock = false;
                 break;
+            case OPT_SCREENSHOT:
+                opts->screenshot = optarg;
+                opts->video = false;
+                opts->audio = false;
+                opts->video_playback = false;
+                opts->audio_playback = false;
+                opts->window = false;
+                opts->control = true;
+                break;
             case OPT_KEEP_ACTIVE:
                 opts->keep_active = true;
                 break;
@@ -2972,7 +2990,7 @@ parse_args_with_getopt(struct scrcpy_cli_args *args, int argc, char *argv[],
     }
 
     if (opts->video && !opts->video_playback && !opts->record_filename
-            && !v4l2) {
+            && !opts->screenshot && !v4l2) {
         LOGI("No video playback, no recording, no V4L2 sink: video disabled");
         opts->video = false;
     }

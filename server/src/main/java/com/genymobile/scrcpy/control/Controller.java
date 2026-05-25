@@ -5,6 +5,7 @@ import com.genymobile.scrcpy.AsyncProcessor;
 import com.genymobile.scrcpy.CleanUp;
 import com.genymobile.scrcpy.Options;
 import com.genymobile.scrcpy.device.Device;
+import com.genymobile.scrcpy.device.Screenshot;
 import com.genymobile.scrcpy.display.DisplayInfo;
 import com.genymobile.scrcpy.model.DeviceApp;
 import com.genymobile.scrcpy.model.Point;
@@ -109,6 +110,7 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
 
     // Used for resetting video encoding on RESET_VIDEO message or for sending camera controls
     private SurfaceCapture surfaceCapture;
+    private final int screenshotMaxDimension;
 
     public Controller(ControlChannel controlChannel, CleanUp cleanUp, Options options) {
         this.camera = options.getVideoSource() == VideoSource.CAMERA;
@@ -127,6 +129,7 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
         }
 
         this.displayId = options.getDisplayId();
+        this.screenshotMaxDimension = options.getMaxSize();
 
         this.clipboardAutosync = options.getClipboardAutosync();
         this.powerOn = options.getPowerOn();
@@ -411,6 +414,9 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
                 case ControlMessage.TYPE_RESIZE_DISPLAY:
                     resizeDisplay(msg.getWidth(), msg.getHeight());
                     return true;
+                case ControlMessage.TYPE_GET_SCREENSHOT:
+                    getScreenshotAsync();
+                    return true;
                 default:
                     // fall through
             }
@@ -679,15 +685,15 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
         return pressReleaseKeycode(KeyEvent.KEYCODE_POWER, Device.INJECT_MODE_ASYNC);
     }
 
-    private void getScreenshotAsync(int format, int jpegQuality, int maxDimension) {
+    private void getScreenshotAsync() {
         if (camera || displayId == Device.DISPLAY_ID_NONE || sender == null) {
             return;
         }
 
         EXECUTOR.execute(() -> {
             try {
-                Screenshot.Result result = Screenshot.capture(displayId, format, jpegQuality, maxDimension);
-                DeviceMessage msg = DeviceMessage.createScreenshot(format, result.width, result.height, result.data);
+                Screenshot.Result result = Screenshot.capture(displayId, screenshotMaxDimension);
+                DeviceMessage msg = DeviceMessage.createScreenshot(result.width, result.height, result.data);
                 sender.send(msg);
             } catch (IOException e) {
                 Ln.w("Screenshot failed: " + e.getMessage());
@@ -695,7 +701,7 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
         });
     }
 
-    private void getClipboard(int copyKey) {
+    private void getClipboard    private void getClipboard(int copyKey) {
         // On Android >= 7, press the COPY or CUT key if requested
         if (copyKey != ControlMessage.COPY_KEY_NONE && Build.VERSION.SDK_INT >= AndroidVersions.API_24_ANDROID_7_0 && supportsInputEvents) {
             int key = copyKey == ControlMessage.COPY_KEY_COPY ? KeyEvent.KEYCODE_COPY : KeyEvent.KEYCODE_CUT;

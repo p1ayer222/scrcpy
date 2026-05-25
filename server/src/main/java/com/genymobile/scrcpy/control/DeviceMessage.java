@@ -14,6 +14,8 @@ public final class DeviceMessage {
     private byte[] data;
     private int width;
     private int height;
+    private int width;
+    private int height;
 
     private DeviceMessage() {
     }
@@ -29,6 +31,15 @@ public final class DeviceMessage {
         DeviceMessage event = new DeviceMessage();
         event.type = TYPE_ACK_CLIPBOARD;
         event.sequence = sequence;
+        return event;
+    }
+
+    public static DeviceMessage createScreenshot(int width, int height, byte[] data) {
+        DeviceMessage event = new DeviceMessage();
+        event.type = TYPE_SCREENSHOT;
+        event.width = width;
+        event.height = height;
+        event.data = data;
         return event;
     }
 
@@ -58,5 +69,13 @@ public final class DeviceMessage {
 
     public byte[] getData() {
         return data;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 }

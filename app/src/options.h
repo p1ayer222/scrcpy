@@ -238,6 +238,7 @@ struct scrcpy_options {
     const char *serial;
     const char *crop;
     const char *record_filename;
+    const char *screenshot;
     const char *window_title;
     const char *push_target;
     const char *render_driver;

@@ -6,6 +6,7 @@ const struct scrcpy_options scrcpy_options_default = {
     .serial = NULL,
     .crop = NULL,
     .record_filename = NULL,
+    .screenshot = NULL,
     .window_title = NULL,
     .push_target = NULL,
     .render_driver = NULL,

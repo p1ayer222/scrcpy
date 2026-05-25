@@ -40,6 +40,8 @@ struct sc_controller {
 struct sc_controller_callbacks {
     void (*on_ended)(struct sc_controller *controller, bool error,
                      void *userdata);
+    void (*on_screenshot)(struct sc_controller *controller,
+                          const struct sc_device_msg *msg, void *userdata);
 };
 
 bool
@@ -71,9 +73,5 @@ sc_controller_push_msg(struct sc_controller *controller,
 void
 sc_controller_resize_display(struct sc_controller *controller,
                              uint16_t width, uint16_t height);
-
-bool
-sc_controller_get_screenshot(struct sc_controller *controller, uint8_t format,
-                             uint8_t jpeg_quality, int32_t max_dimension);
 
 #endif

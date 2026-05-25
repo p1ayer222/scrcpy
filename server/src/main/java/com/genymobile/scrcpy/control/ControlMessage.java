@@ -187,12 +187,9 @@ public final class ControlMessage {
         return msg;
     }
 
-    public static ControlMessage createGetScreenshot(int format, int jpegQuality, int maxDimension) {
+    public static ControlMessage createGetScreenshot() {
         ControlMessage msg = new ControlMessage();
         msg.type = TYPE_GET_SCREENSHOT;
-        msg.action = format;
-        msg.repeat = jpegQuality;
-        msg.metaState = maxDimension;
         return msg;
     }
 

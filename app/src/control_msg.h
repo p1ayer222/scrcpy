@@ -47,6 +47,7 @@ enum sc_control_msg_type {
     SC_CONTROL_MSG_TYPE_CAMERA_ZOOM_IN,
     SC_CONTROL_MSG_TYPE_CAMERA_ZOOM_OUT,
     SC_CONTROL_MSG_TYPE_RESIZE_DISPLAY,
+    SC_CONTROL_MSG_TYPE_GET_SCREENSHOT,
 };
 
 enum sc_copy_key {
@@ -122,11 +123,6 @@ struct sc_control_msg {
             uint16_t width;
             uint16_t height;
         } resize_display;
-        struct {
-            uint8_t format;
-            uint8_t jpeg_quality;
-            int32_t max_dimension;
-        } get_screenshot;
     };
 };
 
