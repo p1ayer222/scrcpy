@@ -188,4 +188,61 @@ public final class SurfaceControl {
             throw new AssertionError(e);
         }
     }
+
+    public static Bitmap screenshot(IBinder displayToken, Rect crop, int width, int height, int rotation) {
+        if (displayToken == null) {
+            return null;
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= AndroidVersions.API_30_ANDROID_11) {
+                Method method = CLASS.getMethod("screenshotToBuffer", IBinder.class, Rect.class, int.class, int.class,
+                        boolean.class, int.class);
+                Object buffer = method.invoke(null, displayToken, crop, width, height, false, rotation);
+                if (buffer == null) {
+                    return null;
+                }
+                Method asBitmap = buffer.getClass().getMethod("asBitmap");
+                return (Bitmap) asBitmap.invoke(buffer);
+            }
+
+            Method method = CLASS.getMethod("screenshot", Rect.class, int.class, int.class, int.class, int.class,
+                    boolean.class, int.class);
+            int minLayer = Integer.MIN_VALUE;
+            int maxLayer = Integer.MAX_VALUE;
+            return (Bitmap) method.invoke(null, crop, width, height, minLayer, maxLayer, false, rotation);
+        } catch (ReflectiveOperationException e) {
+            Ln.e("Could not take screenshot via SurfaceControl", e);
+            return null;
+        }
+    }
+
+    public static Bitmap captureDisplay(IBinder displayToken, int width, int height) {
+        if (displayToken == null) {
+            return null;
+        }
+
+        try {
+            Class<?> screenCaptureClass = Class.forName("android.window.ScreenCapture");
+            Class<?> argsClass = Class.forName("android.window.ScreenCapture$DisplayCaptureArgs");
+            Class<?> builderClass = Class.forName("android.window.ScreenCapture$DisplayCaptureArgs$Builder");
+
+            Constructor<?> builderCtor = builderClass.getConstructor(IBinder.class);
+            Object builder = builderCtor.newInstance(displayToken);
+            builderClass.getMethod("setSize", int.class, int.class).invoke(builder, width, height);
+            Object args = builderClass.getMethod("build").invoke(builder);
+
+            Method captureDisplay = screenCaptureClass.getMethod("captureDisplay", argsClass);
+            Object buffer = captureDisplay.invoke(null, args);
+            if (buffer == null) {
+                return null;
+            }
+
+            Method asBitmap = buffer.getClass().getMethod("asBitmap");
+            return (Bitmap) asBitmap.invoke(buffer);
+        } catch (ReflectiveOperationException e) {
+            Ln.e("Could not take screenshot via ScreenCapture", e);
+            return null;
+        }
+    }
 }

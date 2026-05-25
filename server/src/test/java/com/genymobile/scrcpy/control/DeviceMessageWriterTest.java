@@ -72,4 +72,28 @@ public class DeviceMessageWriterTest {
 
         Assert.assertArrayEquals(expected, actual);
     }
+
+    @Test
+    public void testSerializeScreenshot() throws IOException {
+        byte[] data = {0, 1, 2, 3};
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+        dos.writeByte(DeviceMessage.TYPE_SCREENSHOT);
+        dos.writeByte(0); // format
+        dos.writeShort(1920);
+        dos.writeShort(1080);
+        dos.writeInt(data.length);
+        dos.write(data);
+        byte[] expected = bos.toByteArray();
+
+        bos = new ByteArrayOutputStream();
+        DeviceMessageWriter writer = new DeviceMessageWriter(bos);
+
+        DeviceMessage msg = DeviceMessage.createScreenshot(0, 1920, 1080, data);
+        writer.write(msg);
+
+        byte[] actual = bos.toByteArray();
+
+        Assert.assertArrayEquals(expected, actual);
+    }
 }

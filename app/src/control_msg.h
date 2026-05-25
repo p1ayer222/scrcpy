@@ -122,6 +122,11 @@ struct sc_control_msg {
             uint16_t width;
             uint16_t height;
         } resize_display;
+        struct {
+            uint8_t format;
+            uint8_t jpeg_quality;
+            int32_t max_dimension;
+        } get_screenshot;
     };
 };
 

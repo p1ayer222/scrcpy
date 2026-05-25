@@ -281,6 +281,11 @@ sc_control_msg_log(const struct sc_control_msg *msg) {
             LOG_CMSG("resize display %" PRIu16 "x%" PRIu16,
                      msg->resize_display.width, msg->resize_display.height);
             break;
+        case SC_CONTROL_MSG_TYPE_GET_SCREENSHOT:
+            LOG_CMSG("get screenshot format=%u quality=%u max=%d",
+                     msg->get_screenshot.format, msg->get_screenshot.jpeg_quality,
+                     msg->get_screenshot.max_dimension);
+            break;
         case SC_CONTROL_MSG_TYPE_EXPAND_NOTIFICATION_PANEL:
             LOG_CMSG("expand notification panel");
             break;

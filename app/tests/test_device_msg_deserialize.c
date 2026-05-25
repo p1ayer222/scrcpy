@@ -83,6 +83,32 @@ static void test_deserialize_uhid_output(void) {
     sc_device_msg_destroy(&msg);
 }
 
+static void test_deserialize_screenshot(void) {
+    const uint8_t input[] = {
+        DEVICE_MSG_TYPE_SCREENSHOT,
+        0, // format
+        0x07, 0x80, // width 1920
+        0x04, 0x38, // height 1080
+        0x00, 0x00, 0x00, 0x03, // data length
+        0x01, 0x02, 0x03,
+    };
+
+    struct sc_device_msg msg;
+    ssize_t r = sc_device_msg_deserialize(input, sizeof(input), &msg);
+    assert(r == 13);
+
+    assert(msg.type == DEVICE_MSG_TYPE_SCREENSHOT);
+    assert(msg.screenshot.format == 0);
+    assert(msg.screenshot.width == 1920);
+    assert(msg.screenshot.height == 1080);
+    assert(msg.screenshot.size == 3);
+
+    uint8_t expected[] = {1, 2, 3};
+    assert(!memcmp(msg.screenshot.data, expected, sizeof(expected)));
+
+    sc_device_msg_destroy(&msg);
+}
+
 int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;

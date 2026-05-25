@@ -72,4 +72,8 @@ void
 sc_controller_resize_display(struct sc_controller *controller,
                              uint16_t width, uint16_t height);
 
+bool
+sc_controller_get_screenshot(struct sc_controller *controller, uint8_t format,
+                             uint8_t jpeg_quality, int32_t max_dimension);
+
 #endif

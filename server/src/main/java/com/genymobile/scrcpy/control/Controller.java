@@ -679,6 +679,22 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
         return pressReleaseKeycode(KeyEvent.KEYCODE_POWER, Device.INJECT_MODE_ASYNC);
     }
 
+    private void getScreenshotAsync(int format, int jpegQuality, int maxDimension) {
+        if (camera || displayId == Device.DISPLAY_ID_NONE || sender == null) {
+            return;
+        }
+
+        EXECUTOR.execute(() -> {
+            try {
+                Screenshot.Result result = Screenshot.capture(displayId, format, jpegQuality, maxDimension);
+                DeviceMessage msg = DeviceMessage.createScreenshot(format, result.width, result.height, result.data);
+                sender.send(msg);
+            } catch (IOException e) {
+                Ln.w("Screenshot failed: " + e.getMessage());
+            }
+        });
+    }
+
     private void getClipboard(int copyKey) {
         // On Android >= 7, press the COPY or CUT key if requested
         if (copyKey != ControlMessage.COPY_KEY_NONE && Build.VERSION.SDK_INT >= AndroidVersions.API_24_ANDROID_7_0 && supportsInputEvents) {

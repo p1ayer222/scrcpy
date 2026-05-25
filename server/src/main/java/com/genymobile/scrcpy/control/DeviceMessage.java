@@ -5,12 +5,15 @@ public final class DeviceMessage {
     public static final int TYPE_CLIPBOARD = 0;
     public static final int TYPE_ACK_CLIPBOARD = 1;
     public static final int TYPE_UHID_OUTPUT = 2;
+    public static final int TYPE_SCREENSHOT = 3;
 
     private int type;
     private String text;
     private long sequence;
     private int id;
     private byte[] data;
+    private int width;
+    private int height;
 
     private DeviceMessage() {
     }

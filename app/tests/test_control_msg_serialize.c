@@ -544,5 +544,6 @@ int main(int argc, char *argv[]) {
     test_serialize_camera_zoom_in();
     test_serialize_camera_zoom_out();
     test_serialize_resize_display();
+    test_serialize_get_screenshot();
     return 0;
 }

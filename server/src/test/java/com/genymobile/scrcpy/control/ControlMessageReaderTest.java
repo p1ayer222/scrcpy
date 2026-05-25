@@ -493,6 +493,28 @@ public class ControlMessageReaderTest {
     }
 
     @Test
+    public void testParseGetScreenshot() throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+        dos.writeByte(ControlMessage.TYPE_GET_SCREENSHOT);
+        dos.writeByte(0); // format: JPEG
+        dos.writeByte(80); // quality
+        dos.writeInt(1920); // max dimension
+        byte[] packet = bos.toByteArray();
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(packet);
+        ControlMessageReader reader = new ControlMessageReader(bis);
+
+        ControlMessage event = reader.read();
+        Assert.assertEquals(ControlMessage.TYPE_GET_SCREENSHOT, event.getType());
+        Assert.assertEquals(0, event.getAction());
+        Assert.assertEquals(80, event.getRepeat());
+        Assert.assertEquals(1920, event.getMetaState());
+
+        Assert.assertEquals(-1, bis.read()); // EOS
+    }
+
+    @Test
     public void testMultiEvents() throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);

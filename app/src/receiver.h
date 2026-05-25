@@ -26,6 +26,8 @@ struct sc_receiver {
 
 struct sc_receiver_callbacks {
     void (*on_ended)(struct sc_receiver *receiver, bool error, void *userdata);
+    void (*on_screenshot)(struct sc_receiver *receiver,
+                          const struct sc_device_msg *msg, void *userdata);
 };
 
 bool

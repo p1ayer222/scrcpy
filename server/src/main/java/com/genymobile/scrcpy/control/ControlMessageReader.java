@@ -183,6 +183,13 @@ public class ControlMessageReader {
         return ControlMessage.createResizeDisplay(width, height);
     }
 
+    private ControlMessage parseGetScreenshot() throws IOException {
+        int format = dis.readUnsignedByte();
+        int jpegQuality = dis.readUnsignedByte();
+        int maxDimension = dis.readInt();
+        return ControlMessage.createGetScreenshot(format, jpegQuality, maxDimension);
+    }
+
     private Position parsePosition() throws IOException {
         int x = dis.readInt();
         int y = dis.readInt();

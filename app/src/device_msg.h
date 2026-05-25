@@ -31,6 +31,13 @@ struct sc_device_msg {
             uint16_t size;
             uint8_t *data; // owned, to be freed by free()
         } uhid_output;
+        struct {
+            uint8_t format;
+            uint16_t width;
+            uint16_t height;
+            size_t size;
+            uint8_t *data; // owned, to be freed by free()
+        } screenshot;
     };
 };
 

@@ -39,6 +39,14 @@ public class DeviceMessageWriter {
                 dos.writeShort(data.length);
                 dos.write(data);
                 break;
+            case DeviceMessage.TYPE_SCREENSHOT:
+                dos.writeByte(msg.getId()); // format
+                dos.writeShort(msg.getWidth());
+                dos.writeShort(msg.getHeight());
+                byte[] screenshotData = msg.getData();
+                dos.writeInt(screenshotData.length);
+                dos.write(screenshotData);
+                break;
             default:
                 throw new ControlProtocolException("Unknown event type: " + type);
         }

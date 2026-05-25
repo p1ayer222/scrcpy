@@ -139,6 +139,20 @@ sc_controller_resize_display(struct sc_controller *controller,
     sc_mutex_unlock(&controller->mutex);
 }
 
+bool
+sc_controller_get_screenshot(struct sc_controller *controller, uint8_t format,
+                             uint8_t jpeg_quality, int32_t max_dimension) {
+    struct sc_control_msg msg = {
+        .type = SC_CONTROL_MSG_TYPE_GET_SCREENSHOT,
+        .get_screenshot = {
+            .format = format,
+            .jpeg_quality = jpeg_quality,
+            .max_dimension = max_dimension,
+        },
+    };
+    return sc_controller_push_msg(controller, &msg);
+}
+
 static bool
 process_msg(struct sc_controller *controller,
             const struct sc_control_msg *msg, bool *eos) {
